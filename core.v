@@ -1,9 +1,9 @@
 module core( // modulo de um core
   input clk, // clock
   input resetn, // reset que ativa em zero
-  output reg [31:0] address, // endereço de saída
-  output reg [31:0] data_out, // dado de saída
   input [31:0] data_in, // dado de entrada
+  output reg [31:0] data_out, // dado de saída
+  output reg [31:0] address, // endereço de saída
   output reg we // write enable
 );
 

@@ -92,7 +92,7 @@ always @(posedge clk) begin
     $display("Address reached 4092 (0xFFC). Stopping simulation.");
     $finish;
   end
-  else if (address[11] == 1)
+  else if (address[11] == 1) //accessing position >= 2048 which is the memory, not an instruction
     if (wire_we == 1)
       $display("Write: M[0x%h] <- 0x%h", address, data_out);
     else

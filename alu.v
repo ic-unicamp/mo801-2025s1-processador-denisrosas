@@ -1,13 +1,14 @@
 module alu (
-    input [2:0] ula_control,
+    input [2:0] alu_control,
     input [31:0] source1,
     input [31:0] source2,
     output reg [31:0] result,
-    output reg carry_out
+    output reg carry_out,
+    output reg zero
 );
 
-  always @* begin
-    case (ula_control)
+  always @(alu_control, source1, source2) begin
+    case (alu_control)
         3'b000: result = source1 & source2;
         3'b001: result = source1 | source2;
         3'b010: {carry_out,result} = source1 + source2;
@@ -15,6 +16,7 @@ module alu (
         3'b111: result = (source1 < source2) ? 32'h00000001 : 32'h00000000;
         default: result = 32'h00000000;
     endcase
+    zero = (result == 32'h00000000) ? 1'b1 : 1'b0;
   end
 
 endmodule

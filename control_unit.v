@@ -4,6 +4,7 @@ module control_unit(
     input func7_bit5,
     input [2:0] funct3,
     input [6:0] opcode,
+    input zero,
 
     output reg pcwrite,
     output reg adrsource,

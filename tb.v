@@ -1,7 +1,9 @@
 module tb();
+
 reg clk, resetn;
 wire we;
 wire [31:0] address, data_out, data_in;
+
 core dut(
   .clk(clk),
   .resetn(resetn),
@@ -18,8 +20,10 @@ memory m(
   .data_out(data_in),
   .we(we) 
 );
+
 // Clock generator
 always #1 clk = (clk===1'b0);
+
 // Inicia a simulação e executa até 2000 unidades de tempo após o reset
 initial begin
   $dumpfile("saida.vcd");
@@ -29,6 +33,7 @@ initial begin
   $display("*** Starting simulation. ***");
   #4000 $finish;
 end
+
 // Verifica se o endereço atingiu 4092 (0xFFC) e encerra a simulação
 always @(posedge clk) begin
   if (address == 'hFFC) begin

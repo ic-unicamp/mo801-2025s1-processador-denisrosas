@@ -18,3 +18,5 @@ if diff --strip-trailing-cr test/saida$1.out test/saida$1.ok >/dev/null; then   
     exit 0
 else
     echo "ERRO"
+    exit 1
+fi

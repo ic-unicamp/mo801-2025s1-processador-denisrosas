@@ -144,7 +144,7 @@ module control_unit(
                             resultsource = RESSRC_ALUOUT;
                             adrsource = 1'b1;
                             memwrite = 1'b0;
-                            next_state = WRITEBACK;
+                            next_state = PC_PLUS_4;
                         end
                 default: next_state = FETCH;
                 endcase

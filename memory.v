@@ -15,6 +15,8 @@ always @(address or data_in or we) begin
   data_out = mem[address[13:2]];
 end
 
+//from 0 (0x0) to 2047 (0x800) - instruction memory 
+//from 2048 (0x800) to 4092 (0xFFC) - data memory
 
 initial begin
   for (i = 0; i < 1024; i = i + 1) begin

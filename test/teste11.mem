@@ -1,0 +1,6 @@
+0x40000013 // addi  x0, x0, 1024 - armazenando 1024 em x0
+0x40000093 // addi  x1, x0, 1024 - armazenando 2048 (primeira posição da memoria de dados) em x1
+0x00100113 // addi  x2, x0, 1    - armazenando 1025 (0x401) em x2
+0x0020a023 // sw    x2, 0(x1)    - armazena o valor em x2 na posicao de memoria x1 (2048) + 0
+0x00100193 // addi  x3, x0, 1    - armazenando 0xCBA em x3
+0x0030a223 // sw    x3, 4(x1)    - armazena o valor em x3 na posicao de memoria x1 (2048) + 4

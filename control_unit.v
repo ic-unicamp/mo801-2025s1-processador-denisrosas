@@ -105,7 +105,6 @@ module control_unit(
                 next_state = DECODE;
             end
 
-            //mais um ciclo pra dar tempo de armazenar a instrucao no 
             DECODE: begin
                 irwrite = 1;
                 next_state = EXECUTE;
@@ -120,20 +119,36 @@ module control_unit(
                                   alu_control = 3'b000; //add
                                   next_state = WRITEBACK;
                     end
+                    OPCODE_STYPE: begin
+                                  imm_source = IMMSRC_STYPE;
+                                  alu_source_a = ALUSRCA_RD1;
+                                  alu_source_b = ALUSRCB_IMMEXT;
+                                  alu_control = 3'b000; //add
+                                  next_state = MEMORY_ACCESS;
+                    end
                     default: next_state = FETCH;
                 endcase
             end
 
-            // MEMORY_ACCESS: begin
-            //     case (opcode)
-            //         OPCODE_LTYPE: begin
-            //                       adrsource = 1;
-            //                       next_state = WRITEBACK;
-            //         end
-            //         OPCODE_STYPE: next_state = EXECUTE_S;
-            //     default: next_state = FETCH;
-            //     endcase
-            // end
+            MEMORY_ACCESS: begin
+                case (opcode)
+                    OPCODE_STYPE:
+                        begin
+                            resultsource = RESSRC_ALUOUT;
+                            adrsource = 1'b1;
+                            memwrite = 1'b1;
+                            next_state = PC_PLUS_4;
+                        end
+                    OPCODE_LTYPE:
+                        begin
+                            resultsource = RESSRC_ALUOUT;
+                            adrsource = 1'b1;
+                            memwrite = 1'b0;
+                            next_state = WRITEBACK;
+                        end
+                default: next_state = FETCH;
+                endcase
+            end
 
             WRITEBACK: begin
                 regwrite = 1'b1;

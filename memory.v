@@ -19,3 +19,5 @@ always @(posedge clk) begin
     mem[address[13:2]] = data_in;
   end
 end
+
+endmodule

@@ -21,12 +21,13 @@ module control_unit(
     reg [2:0] state, next_state;
 
     // Estados da máquina de estados
-    localparam FETCH = 0;
-    localparam DECODE = 1;
-    localparam EXECUTE = 2;
-    localparam MEMORY_ACCESS = 3;
-    localparam WRITEBACK = 4;
-    localparam PC_PLUS_4 = 5;
+    localparam STATE_RESET = 3'b000;
+    localparam FETCH = 3'b001;
+    localparam DECODE = 3'b010;
+    localparam EXECUTE = 3'b011;
+    localparam MEMORY_ACCESS = 3'b100;
+    localparam WRITEBACK = 3'b101;
+    localparam PC_PLUS_4 = 3'b110;
 
     // Definição de opcodes e funct3
     localparam OPCODE_ITYPE = 7'b0010011;
@@ -51,11 +52,11 @@ module control_unit(
     localparam ALUSRCB_4 = 2'b10;
 
     // alu control
-    localparam ALUCTRL_AND  = 3'b000;
-    localparam ALUCTRL_OR   = 3'b001;
-    localparam ALUCTRL_ADD  = 3'b010;
-    localparam ALUCTRL_SUB  = 3'b110;
-    localparam ALUCTRL_SLT  = 3'b111;
+    localparam ALUCTRL_AND  = 3'b010;
+    localparam ALUCTRL_OR   = 3'b011;
+    localparam ALUCTRL_ADD  = 3'b000;
+    localparam ALUCTRL_SUB  = 3'b001;
+    localparam ALUCTRL_SLT  = 3'b101;
 
     // Result source
     localparam RESSRC_ALUOUT = 2'b10;
@@ -75,7 +76,7 @@ module control_unit(
     // Transição de estados na borda de subida do clock
     always @(posedge clk) begin
         if(reset == 1'b0)
-          state = FETCH;
+          state = STATE_RESET;
         else
           state = next_state;
     end
@@ -95,6 +96,10 @@ module control_unit(
         regwrite = 0;
 
         case (state)
+            STATE_RESET: begin
+                next_state = FETCH;
+            end
+
             FETCH: begin
                 adrsource = 0;
                 next_state = DECODE;

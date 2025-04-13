@@ -9,11 +9,11 @@ module alu (
 
   always @(alu_control, source1, source2) begin
     case (alu_control)
-        3'b000: result = source1 & source2;
-        3'b001: result = source1 | source2;
-        3'b010: {carry_out,result} = source1 + source2;
-        3'b110: result = source1 - source2;
-        3'b111: result = (source1 < source2) ? 32'h00000001 : 32'h00000000;
+        3'b000: {carry_out,result} = source1 + source2;
+        3'b001: result = source1 - source2;
+        3'b010: result = source1 & source2;
+        3'b011: result = source1 | source2;
+        3'b101: result = (source1 < source2) ? 32'h00000001 : 32'h00000000;
         default: result = 32'h00000000;
     endcase
     zero = (result == 32'h00000000) ? 1'b1 : 1'b0;

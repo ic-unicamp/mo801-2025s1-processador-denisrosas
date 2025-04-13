@@ -25,7 +25,7 @@ wire [6:0] wire_opcode;
 
 //wires da instruction que vao para o register file
 wire [4:0] wire_rs1, wire_rs2, wire_rd; //input of register file
-wire [31:7] wire_extend_input;
+wire [31:0] wire_extend_input;
 wire [31:0] wire_read_data1, wire_read_data2; //output of register file
 
 //wires na regiao dos multiplexadores e alu
@@ -47,7 +47,7 @@ assign wire_rs2 = instruction[24:20];
 assign wire_rd = instruction[11:7];
 
 //assigning the wires of the extend
-assign wire_extend_input = instruction[31:7];
+assign wire_extend_input = instruction[31:0];
 
 //other assigns
 assign wire_pc_next = wire_result;
@@ -55,8 +55,11 @@ assign wire_write_data = wire_read_data2;
 
 
 //criando os registradores
-reg  [31:0] pc, old_pc, instruction, data_mem, alu_out;
-
+reg  [31:0] pc = 0;
+reg  [31:0] old_pc = 0;
+reg  [31:0] instruction = 0;
+reg  [31:0] data_mem = 0;
+reg  [31:0] alu_out = 0;
 //                            INSTANCIANDO MODULOS
 
 //multiplexer to select the next memory address
@@ -141,9 +144,9 @@ alu alu(
 
 //instanciando o multiplexer para selecionar de 3 inputs para selecionar o resultado
 multiplexer_3_inputs mux_result(
-  .in0(alu_out),
-  .in1(data_mem),
-  .in2(32'h00000000),
+  .in2(alu_out), //alu_src == 10
+  .in1(data_mem), //alu_src == 01
+  .in0(wire_alu_result), //alu_src == 00
   .control(wire_resultsource),
   .out(wire_result)
 );
@@ -170,7 +173,6 @@ always @(posedge clk) begin
     old_pc = pc;
     instruction = data_in;
   end
-
 
   alu_out = wire_alu_result;
 

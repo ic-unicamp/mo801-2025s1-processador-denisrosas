@@ -1,5 +1,5 @@
 module extend (
-    input [31:7] instr,       // Instruction bits 31:7
+    input [31:0] instr,       // Instruction bits 31:0 - only 31:7 will be used
     input [1:0] imm_src,      // Immediate format selector
     output reg [31:0] imm_ext  // Sign-extended immediate
 );

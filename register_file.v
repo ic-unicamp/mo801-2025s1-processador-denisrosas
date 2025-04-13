@@ -11,6 +11,12 @@ output reg [31:0] read_data2
 
   reg [31:0] registers [31:0]; // Array of 32 registers, each 32 bits wide
 
+  initial begin
+    for (integer i = 0; i < 32; i = i + 1) begin
+        registers[i] = 32'b0;  // Initialize each register to 0
+    end
+  end
+
   // Read registers
   always @(negedge clk)
     begin

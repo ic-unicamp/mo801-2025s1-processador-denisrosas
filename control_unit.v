@@ -25,16 +25,17 @@ module control_unit(
     localparam FETCH = 3'b001;
     localparam DECODE = 3'b010;
     localparam EXECUTE = 3'b011;
-    localparam MEMORY_ACCESS = 3'b100;
+    localparam MEMORY_ACCESS = 3'b100; 
     localparam WRITEBACK = 3'b101;
     localparam PC_PLUS_4 = 3'b110;
 
-    // Definição de opcodes e funct3
-    localparam OPCODE_ITYPE = 7'b0010011;
-    localparam OPCODE_LTYPE = 7'b0000011;
-    localparam OPCODE_STYPE = 7'b0100011;
-    localparam OPCODE_RTYPE = 7'b0110011;
-    localparam OPCODE_BTYPE = 7'b1100011;
+    // Definição de opcodes
+    localparam INT_REG_IMM_SHIFT_INSTR = 7'b0010011;
+    localparam MEMORY_LOAD_INSTR = 7'b0000011;
+    localparam MEMORY_STORE_INSTR = 7'b0100011;
+    localparam INT_REG_REG_INSTR = 7'b0110011;
+    localparam BRANCH_INSTR = 7'b1100011;
+    localparam JUMP_AND_LINK_INSTR = 7'b1100011;
 
     //imm source types
     localparam IMMSRC_ITYPE = 2'b00;
@@ -112,19 +113,28 @@ module control_unit(
 
             EXECUTE: begin
                 case (opcode)
-                    OPCODE_ITYPE: begin
+                    INT_REG_IMM_SHIFT_INSTR: begin //addi
                                   imm_source = IMMSRC_ITYPE;
                                   alu_source_a = ALUSRCA_RD1;
                                   alu_source_b = ALUSRCB_IMMEXT;
                                   alu_control = 3'b000; //add
                                   next_state = WRITEBACK;
                     end
-                    OPCODE_STYPE: begin
+                    MEMORY_STORE_INSTR: begin
                                   imm_source = IMMSRC_STYPE;
                                   alu_source_a = ALUSRCA_RD1;
                                   alu_source_b = ALUSRCB_IMMEXT;
                                   alu_control = 3'b000; //add
                                   next_state = MEMORY_ACCESS;
+                    end
+                    MEMORY_LOAD_INSTR: begin
+                                  imm_source = IMMSRC_ITYPE;
+                                  alu_source_a = ALUSRCA_RD1;
+                                  alu_source_b = ALUSRCB_IMMEXT;
+                                  alu_control = 3'b000; //add
+                                  resultsource = RESSRC_PC4; //
+                                  adrsource = 1'b1;
+                                  next_state = WRITEBACK;
                     end
                     default: next_state = FETCH;
                 endcase
@@ -132,18 +142,11 @@ module control_unit(
 
             MEMORY_ACCESS: begin
                 case (opcode)
-                    OPCODE_STYPE:
+                    MEMORY_STORE_INSTR:
                         begin
                             resultsource = RESSRC_ALUOUT;
                             adrsource = 1'b1;
                             memwrite = 1'b1;
-                            next_state = PC_PLUS_4;
-                        end
-                    OPCODE_LTYPE:
-                        begin
-                            resultsource = RESSRC_ALUOUT;
-                            adrsource = 1'b1;
-                            memwrite = 1'b0;
                             next_state = PC_PLUS_4;
                         end
                 default: next_state = FETCH;
@@ -151,8 +154,17 @@ module control_unit(
             end
 
             WRITEBACK: begin
-                regwrite = 1'b1;
-                resultsource = RESSRC_ALUOUT;
+                case (opcode)
+                    MEMORY_LOAD_INSTR: begin
+                        resultsource = RESSRC_MEM;
+                        regwrite = 1'b1;
+                    end
+                    INT_REG_IMM_SHIFT_INSTR: begin
+                        resultsource = RESSRC_ALUOUT;
+                        regwrite = 1'b1;
+                    end
+                    default: next_state = FETCH;
+                endcase
                 next_state = PC_PLUS_4;
             end
 

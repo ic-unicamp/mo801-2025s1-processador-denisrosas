@@ -31,20 +31,23 @@ initial begin
   resetn = 1'b0;
   #11 resetn = 1'b1;
   $display("*** Starting simulation. ***");
+  //$monitor("Time: %0t | Address: 0x%h | Data Out: 0x%h | Data In: 0x%h | WE: %b", $time, address, data_out, data_in, we);
   #4000 $finish;
 end
 
 // Verifica se o endereço atingiu 4092 (0xFFC) e encerra a simulação
-always @(posedge clk) begin
+always @(negedge clk) begin
   if (address == 'hFFC) begin
     $display("Address reached 4092 (0xFFC). Stopping simulation.");
     $finish;
   end
-  else if (address[11] == 1)
+end
+
+always @(negedge clk) begin
+  if (address[11] == 1)
     if (we == 1)
       $display("=== M[0x%h] <- 0x%h", address, data_out);
     // else
     //   $display("=== M[0x%h] -> 0x%h", address, data_in);
 end
-
 endmodule

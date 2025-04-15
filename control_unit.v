@@ -169,7 +169,7 @@ module control_unit(
             end
 
             PC_PLUS_4: begin
-                alu_source_a = ALUSRCA_PC;
+                alu_source_a = ALUSRCA_OLDPC;
                 alu_source_b = ALUSRCB_4;
                 alu_control = ALUCTRL_ADD;
                 resultsource = RESSRC_PC4;

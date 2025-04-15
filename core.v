@@ -158,7 +158,7 @@ always @(posedge clk) begin
   end
 end
 
-always @(posedge clk) begin
+always @(posedge clk, wire_memwrite) begin
 
   if (wire_pcwrite == 1'b1) begin
     pc = wire_pc_next;

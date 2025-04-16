@@ -136,6 +136,31 @@ module control_unit(
                                   adrsource = 1'b1;
                                   next_state = WRITEBACK;
                     end
+                    INT_REG_REG_INSTR: begin
+                        imm_source = IMMSRC_ITYPE;
+                        alu_source_a = ALUSRCA_RD1;
+                        alu_source_b = ALUSRCB_RD2;
+                        case (funct3)
+                            FUNCT3_ADD_SUB: begin
+                                if (func7_bit5 == 1'b0) begin
+                                    alu_control = ALUCTRL_ADD; //add
+                                end else begin
+                                    alu_control = ALUCTRL_SUB; //sub
+                                end
+                            end
+                            FUNCT3_AND: begin
+                                alu_control = ALUCTRL_AND; //and
+                            end
+                            FUNCT3_OR: begin
+                                alu_control = ALUCTRL_OR; //or
+                            end
+                            FUNCT3_SLT: begin
+                                alu_control = ALUCTRL_SLT; //slt
+                            end
+                            default: next_state = FETCH;
+                        endcase
+                        next_state = WRITEBACK;
+                    end
                     default: next_state = FETCH;
                 endcase
             end
@@ -160,6 +185,10 @@ module control_unit(
                         regwrite = 1'b1;
                     end
                     INT_REG_IMM_SHIFT_INSTR: begin
+                        resultsource = RESSRC_ALUOUT;
+                        regwrite = 1'b1;
+                    end
+                    INT_REG_REG_INSTR: begin
                         resultsource = RESSRC_ALUOUT;
                         regwrite = 1'b1;
                     end

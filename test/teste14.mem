@@ -1,0 +1,8 @@
+40000013 //addi x0, x0, 1024    - x0 = 1024
+20008093 //addi x1, x1, 512     - x1 = 512
+00000113 //addi x2, x0, 0     -   x2 = 1024
+00100463 //beq  x0, x1, 8       - x0 != x1 -> no branch
+00200463 //beq  x0, x2, 8       - x0 == x2 -> branch
+001081b3 //add  x3, x1, x1      - not executed
+002081b3 //add  x3, x1, x2      - x3 = 1536
+40302223 //sw   x3, 1028(x0)    - store 1536 in 0x2048

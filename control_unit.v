@@ -28,6 +28,7 @@ module control_unit(
     localparam MEMORY_ACCESS = 3'b100; 
     localparam WRITEBACK = 3'b101;
     localparam PC_PLUS_4 = 3'b110;
+    localparam CALCULATE_BRANCH = 3'b111;
 
     // Definição de opcodes
     localparam INT_REG_IMM_SHIFT_INSTR = 7'b0010011;
@@ -73,6 +74,11 @@ module control_unit(
 
     // Funct3 valores para instruções B-type
     localparam FUNCT3_BEQ = 3'b000;
+    localparam FUNCT3_BNE = 3'b001;
+    localparam FUNCT3_BLT = 3'b100;
+    localparam FUNCT3_BLTU = 3'b110;
+    localparam FUNCT3_BGE = 3'b101;
+    localparam FUNCT3_BGEU = 3'b111;
 
     // Transição de estados na borda de subida do clock
     always @(posedge clk) begin
@@ -136,6 +142,30 @@ module control_unit(
                                   adrsource = 1'b1;
                                   next_state = WRITEBACK;
                     end
+                    BRANCH_INSTR: begin
+                        alu_source_a = ALUSRCA_RD1;
+                        alu_source_b = ALUSRCB_RD2;
+                        case (funct3)
+                            FUNCT3_BEQ: begin
+                                alu_control = ALUCTRL_SUB; //sub
+                                resultsource = RESSRC_ZERO;
+                                if (zero) 
+                                    next_state = CALCULATE_BRANCH;
+                                else 
+                                    next_state = PC_PLUS_4;
+                            end
+                            default: next_state = FETCH;
+                        endcase
+                    end
+                    JUMP_AND_LINK_INSTR: begin
+                        imm_source = IMMSRC_BTYPE;
+                        alu_source_a = ALUSRCA_OLDPC;
+                        alu_source_b = ALUSRCB_IMMEXT;
+                        alu_control = ALUCTRL_ADD; //add
+                        resultsource = RESSRC_PC4;
+                        pcwrite = 1'b1;
+                        next_state = WRITEBACK;
+                    end
                     INT_REG_REG_INSTR: begin
                         imm_source = IMMSRC_ITYPE;
                         alu_source_a = ALUSRCA_RD1;
@@ -163,6 +193,16 @@ module control_unit(
                     end
                     default: next_state = FETCH;
                 endcase
+            end
+
+            CALCULATE_BRANCH: begin
+                imm_source = IMMSRC_BTYPE;
+                alu_source_a = ALUSRCA_OLDPC;
+                alu_source_b = ALUSRCB_IMMEXT;
+                alu_control = ALUCTRL_ADD; //add
+                resultsource = RESSRC_PC4;
+                pcwrite = 1'b1;
+                next_state = FETCH;
             end
 
             MEMORY_ACCESS: begin

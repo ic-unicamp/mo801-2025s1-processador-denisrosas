@@ -36,7 +36,7 @@ module control_unit(
     localparam MEMORY_STORE_INSTR = 7'b0100011;
     localparam INT_REG_REG_INSTR = 7'b0110011;
     localparam BRANCH_INSTR = 7'b1100011;
-    localparam JUMP_AND_LINK_INSTR = 7'b1100011;
+    localparam JUMP_AND_LINK_INSTR = 7'b1101111;
 
     //imm source types
     localparam IMMSRC_ITYPE = 2'b00;

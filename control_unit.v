@@ -21,14 +21,15 @@ module control_unit(
     reg [2:0] state, next_state;
 
     // Estados da máquina de estados
-    localparam STATE_RESET = 3'b000;
-    localparam FETCH = 3'b001;
-    localparam DECODE = 3'b010;
-    localparam EXECUTE = 3'b011;
-    localparam MEMORY_ACCESS = 3'b100; 
-    localparam WRITEBACK = 3'b101;
-    localparam PC_PLUS_4 = 3'b110;
-    localparam CALCULATE_BRANCH = 3'b111;
+    localparam STATE_RESET = 0; //3'b0000;
+    localparam FETCH = 1; //3'b0001;
+    localparam DECODE =  2; //3'b0010;
+    localparam EXECUTE =  3; //3'b0011;
+    localparam MEMORY_ACCESS = 4; //3'b0100; 
+    localparam WRITEBACK =  5; //3'b0101;
+    localparam PC_PLUS_4 =  6; //3'b0110;
+    localparam CALCULATE_BRANCH = 7; //3'b0111;
+    localparam JUMP = 8; //3'b1000;
 
     // Definição de opcodes
     localparam INT_REG_IMM_SHIFT_INSTR = 7'b0010011;
@@ -61,9 +62,9 @@ module control_unit(
     localparam ALUCTRL_SLT  = 3'b101;
 
     // Result source
-    localparam RESSRC_ALUOUT = 2'b10;
-    localparam RESSRC_MEM = 2'b01;
-    localparam RESSRC_PC4 = 2'b00;
+    localparam RESSRC_ALUOUT = 2'b10; //from register
+    localparam RESSRC_MEM = 2'b01; //from memory
+    localparam RESSRC_ALURESULT = 2'b00;
     localparam RESSRC_ZERO = 2'b11;
 
     // Funct3 valores para instruções R-type
@@ -138,7 +139,7 @@ module control_unit(
                                   alu_source_a = ALUSRCA_RD1;
                                   alu_source_b = ALUSRCB_IMMEXT;
                                   alu_control = 3'b000; //add
-                                  resultsource = RESSRC_PC4; //
+                                  resultsource = RESSRC_ALURESULT;
                                   adrsource = 1'b1;
                                   next_state = WRITEBACK;
                     end
@@ -158,12 +159,9 @@ module control_unit(
                         endcase
                     end
                     JUMP_AND_LINK_INSTR: begin
-                        imm_source = IMMSRC_BTYPE;
                         alu_source_a = ALUSRCA_OLDPC;
-                        alu_source_b = ALUSRCB_IMMEXT;
+                        alu_source_b = ALUSRCB_PC4;
                         alu_control = ALUCTRL_ADD; //add
-                        resultsource = RESSRC_PC4;
-                        pcwrite = 1'b1;
                         next_state = WRITEBACK;
                     end
                     INT_REG_REG_INSTR: begin
@@ -211,7 +209,7 @@ module control_unit(
                         alu_source_a = ALUSRCA_OLDPC;
                         alu_source_b = ALUSRCB_IMMEXT;
                         alu_control = ALUCTRL_ADD; //add
-                        resultsource = RESSRC_PC4;
+                        resultsource = RESSRC_ALURESULT;
                         pcwrite = 1'b1;
                         next_state = WRITEBACK;
                     end
@@ -224,7 +222,7 @@ module control_unit(
                 alu_source_a = ALUSRCA_OLDPC;
                 alu_source_b = ALUSRCB_IMMEXT;
                 alu_control = ALUCTRL_ADD; //add
-                resultsource = RESSRC_PC4;
+                resultsource = RESSRC_ALURESULT;
                 pcwrite = 1'b1;
                 next_state = FETCH;
             end
@@ -244,28 +242,44 @@ module control_unit(
 
             WRITEBACK: begin //101
                 case (opcode)
-                    MEMORY_LOAD_INSTR: begin
+                    MEMORY_LOAD_INSTR: begin //lw
                         resultsource = RESSRC_MEM;
                         regwrite = 1'b1;
+                        next_state = PC_PLUS_4;
                     end
-                    INT_REG_IMM_SHIFT_INSTR: begin
+                    INT_REG_IMM_SHIFT_INSTR: begin //addi, slti, andi, ori
                         resultsource = RESSRC_ALUOUT;
                         regwrite = 1'b1;
+                        next_state = PC_PLUS_4;
                     end
-                    INT_REG_REG_INSTR: begin
+                    INT_REG_REG_INSTR: begin //add, sub, and, or, slt
                         resultsource = RESSRC_ALUOUT;
                         regwrite = 1'b1;
+                        next_state = PC_PLUS_4;
+                    end
+                    JUMP_AND_LINK_INSTR: begin //jal
+                        resultsource = ALUOUT;
+                        regwrite = 1'b1;
+                        next_state = JUMP;
                     end
                     default: next_state = FETCH;
                 endcase
-                next_state = PC_PLUS_4;
             end
 
             PC_PLUS_4: begin
                 alu_source_a = ALUSRCA_OLDPC;
                 alu_source_b = ALUSRCB_4;
                 alu_control = ALUCTRL_ADD;
-                resultsource = RESSRC_PC4;
+                resultsource = RESSRC_ALURESULT;
+                pcwrite = 1'b1;
+                next_state = FETCH;
+            end
+
+            JUMP: begin
+                alu_source_a = ALUSRCA_OLDPC;
+                alu_source_b = ALUSRCB_IMMEXT;
+                alu_control = ALUCTRL_ADD; 
+                resultsource = RESSRC_ALURESULT;
                 pcwrite = 1'b1;
                 next_state = FETCH;
             end

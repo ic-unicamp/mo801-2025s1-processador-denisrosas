@@ -103,21 +103,21 @@ module control_unit(
         regwrite = 0;
 
         case (state)
-            STATE_RESET: begin
+            STATE_RESET: begin //000
                 next_state = FETCH;
             end
 
-            FETCH: begin
+            FETCH: begin //001
                 adrsource = 0;
                 next_state = DECODE;
             end
 
-            DECODE: begin
+            DECODE: begin //010
                 irwrite = 1;
                 next_state = EXECUTE;
             end
 
-            EXECUTE: begin
+            EXECUTE: begin //011
                 case (opcode)
                     INT_REG_IMM_SHIFT_INSTR: begin //addi
                                   imm_source = IMMSRC_ITYPE;
@@ -191,11 +191,35 @@ module control_unit(
                         endcase
                         next_state = WRITEBACK;
                     end
+                    BRANCH_INSTR: begin
+                        alu_source_a = ALUSRCA_RD1; //calcu
+                        alu_source_b = ALUSRCB_RD2;
+                        case (funct3)
+                            FUNCT3_BEQ: begin
+                                alu_control = ALUCTRL_SUB; //sub
+                                resultsource = RESSRC_ZERO;
+                                if (zero) 
+                                    next_state = CALCULATE_BRANCH;
+                                else 
+                                    next_state = PC_PLUS_4;
+                            end
+                            default: next_state = FETCH;
+                        endcase
+                    end
+                    JUMP_AND_LINK_INSTR: begin
+                        imm_source = IMMSRC_BTYPE;
+                        alu_source_a = ALUSRCA_OLDPC;
+                        alu_source_b = ALUSRCB_IMMEXT;
+                        alu_control = ALUCTRL_ADD; //add
+                        resultsource = RESSRC_PC4;
+                        pcwrite = 1'b1;
+                        next_state = WRITEBACK;
+                    end
                     default: next_state = FETCH;
                 endcase
             end
 
-            CALCULATE_BRANCH: begin
+            CALCULATE_BRANCH: begin //111
                 imm_source = IMMSRC_BTYPE;
                 alu_source_a = ALUSRCA_OLDPC;
                 alu_source_b = ALUSRCB_IMMEXT;
@@ -205,7 +229,7 @@ module control_unit(
                 next_state = FETCH;
             end
 
-            MEMORY_ACCESS: begin
+            MEMORY_ACCESS: begin //100
                 case (opcode)
                     MEMORY_STORE_INSTR:
                         begin
@@ -218,7 +242,7 @@ module control_unit(
                 endcase
             end
 
-            WRITEBACK: begin
+            WRITEBACK: begin //101
                 case (opcode)
                     MEMORY_LOAD_INSTR: begin
                         resultsource = RESSRC_MEM;

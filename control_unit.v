@@ -5,6 +5,7 @@ module control_unit(
     input [2:0] funct3,
     input [6:0] opcode,
     input zero,
+    input negative,
 
     output reg pcwrite,
     output reg adrsource,
@@ -78,8 +79,8 @@ module control_unit(
     localparam FUNCT3_BEQ = 3'b000;
     localparam FUNCT3_BNE = 3'b001;
     localparam FUNCT3_BLT = 3'b100;
-    localparam FUNCT3_BLTU = 3'b110;
     localparam FUNCT3_BGE = 3'b101;
+    localparam FUNCT3_BLTU = 3'b110;
     localparam FUNCT3_BGEU = 3'b111;
 
     // Transição de estados na borda de subida do clock
@@ -150,8 +151,28 @@ module control_unit(
                         case (funct3)
                             FUNCT3_BEQ: begin
                                 alu_control = ALUCTRL_SUB; //sub
-                                resultsource = RESSRC_ZERO;
                                 if (zero) 
+                                    next_state = CALCULATE_BRANCH;
+                                else 
+                                    next_state = PC_PLUS_4;
+                            end
+                            FUNCT3_BNE: begin
+                                alu_control = ALUCTRL_SUB; //sub
+                                if (!zero) 
+                                    next_state = CALCULATE_BRANCH;
+                                else 
+                                    next_state = PC_PLUS_4;
+                            end
+                            FUNCT3_BLT: begin
+                                alu_control = ALUCTRL_SUB; //sub
+                                if (negative) 
+                                    next_state = CALCULATE_BRANCH;
+                                else 
+                                    next_state = PC_PLUS_4;
+                            end
+                            FUNCT3_BGE: begin
+                                alu_control = ALUCTRL_SUB; //sub
+                                if (!negative) 
                                     next_state = CALCULATE_BRANCH;
                                 else 
                                     next_state = PC_PLUS_4;

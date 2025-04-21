@@ -19,7 +19,7 @@ wire wire_write_enable; //input mem
 wire [31:0] wire_read_data_mem; //output mem
 
 //wires input of control_unit
-wire wire_funct7_bit5, wire_zero;
+wire wire_funct7_bit5, wire_zero, wire_negative;
 wire [2:0] wire_funct3;
 wire [6:0] wire_opcode;
 
@@ -79,6 +79,7 @@ control_unit ctr_unit(
   .funct3(wire_funct3),
   .opcode(wire_opcode),
   .zero(wire_zero),
+  .negative(wire_negative),
 
   //outputs
   .pcwrite(wire_pcwrite),
@@ -139,7 +140,8 @@ alu alu(
   .source2(wire_alu_source_b_out),
   .result(wire_alu_result),
   .carry_out(),
-  .zero(wire_zero)
+  .zero(wire_zero),
+  .negative(wire_negative)
 );
 
 //instanciando o multiplexer para selecionar de 3 inputs para selecionar o resultado

@@ -4,7 +4,8 @@ module alu (
     input [31:0] source2,
     output reg [31:0] result,
     output reg carry_out,
-    output reg zero
+    output reg zero,
+    output reg negative
 );
 
   always @(alu_control, source1, source2) begin
@@ -17,6 +18,7 @@ module alu (
         default: result = 32'h00000000;
     endcase
     zero = (result == 32'h00000000) ? 1'b1 : 1'b0;
+    negative = (result[31] == 1'b1) ? 1'b1 : 1'b0;
   end
 
 endmodule

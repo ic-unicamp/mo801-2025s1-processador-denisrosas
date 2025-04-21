@@ -18,7 +18,7 @@ module control_unit(
     output reg [1:0] resultsource
 );
 
-    reg [2:0] state, next_state;
+    reg [3:0] state, next_state;
 
     // Estados da máquina de estados
     localparam STATE_RESET = 0; //3'b0000;
@@ -43,6 +43,7 @@ module control_unit(
     localparam IMMSRC_ITYPE = 2'b00;
     localparam IMMSRC_STYPE = 2'b01;
     localparam IMMSRC_BTYPE = 2'b10;
+    localparam IMMSRC_JTYPE = 2'b11;
 
     //alu A source
     localparam ALUSRCA_PC = 2'b00;
@@ -160,7 +161,7 @@ module control_unit(
                     end
                     JUMP_AND_LINK_INSTR: begin
                         alu_source_a = ALUSRCA_OLDPC;
-                        alu_source_b = ALUSRCB_PC4;
+                        alu_source_b = ALUSRCB_4;
                         alu_control = ALUCTRL_ADD; //add
                         next_state = WRITEBACK;
                     end
@@ -258,7 +259,7 @@ module control_unit(
                         next_state = PC_PLUS_4;
                     end
                     JUMP_AND_LINK_INSTR: begin //jal
-                        resultsource = ALUOUT;
+                        resultsource = RESSRC_ALUOUT;
                         regwrite = 1'b1;
                         next_state = JUMP;
                     end
@@ -276,6 +277,7 @@ module control_unit(
             end
 
             JUMP: begin
+                imm_source = IMMSRC_JTYPE;
                 alu_source_a = ALUSRCA_OLDPC;
                 alu_source_b = ALUSRCB_IMMEXT;
                 alu_control = ALUCTRL_ADD; 

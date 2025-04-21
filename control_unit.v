@@ -75,6 +75,13 @@ module control_unit(
     localparam FUNCT3_OR = 3'b110;
     localparam FUNCT3_SLT = 3'b010;
 
+    // Funct3 valores para instruções I-type
+    localparam FUNCT3_ADDI = 3'b000;
+    localparam FUNCT3_SLTI = 3'b010;
+    localparam FUNCT3_XORI = 3'b100;
+    localparam FUNCT3_ORI = 3'b110;
+    localparam FUNCT3_ANDI = 3'b111;
+
     // Funct3 valores para instruções B-type
     localparam FUNCT3_BEQ = 3'b000;
     localparam FUNCT3_BNE = 3'b001;
@@ -123,11 +130,37 @@ module control_unit(
             EXECUTE: begin //011
                 case (opcode)
                     INT_REG_IMM_SHIFT_INSTR: begin //addi
+                        case (funct3)
+                            FUNCT3_ADDI: begin
                                   imm_source = IMMSRC_ITYPE;
                                   alu_source_a = ALUSRCA_RD1;
                                   alu_source_b = ALUSRCB_IMMEXT;
                                   alu_control = 3'b000; //add
                                   next_state = WRITEBACK;
+                            end
+                            FUNCT3_SLTI: begin
+                                  imm_source = IMMSRC_ITYPE;
+                                  alu_source_a = ALUSRCA_RD1;
+                                  alu_source_b = ALUSRCB_IMMEXT;
+                                  alu_control = 3'b101; //slt
+                                  next_state = WRITEBACK;
+                            end
+                            FUNCT3_ORI: begin
+                                  imm_source = IMMSRC_ITYPE;
+                                  alu_source_a = ALUSRCA_RD1;
+                                  alu_source_b = ALUSRCB_IMMEXT;
+                                  alu_control = 3'b011; //or
+                                  next_state = WRITEBACK;
+                            end
+                            FUNCT3_ANDI: begin
+                                  imm_source = IMMSRC_ITYPE;
+                                  alu_source_a = ALUSRCA_RD1;
+                                  alu_source_b = ALUSRCB_IMMEXT;
+                                  alu_control = 3'b010; //and
+                                  next_state = WRITEBACK;
+                            end
+                            default: next_state = FETCH;
+                        endcase
                     end
                     MEMORY_STORE_INSTR: begin
                                   imm_source = IMMSRC_STYPE;
